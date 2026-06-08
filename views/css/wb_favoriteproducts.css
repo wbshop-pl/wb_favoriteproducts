@@ -1,0 +1,234 @@
+/**
+ * wb_favoriteproducts — self-contained front styles.
+ * Theme-independent; Bootstrap 5 friendly (uses BS5 grid utility classes in the
+ * up-selling block but does not depend on them for the core look).
+ *
+ * Customise the accent colour per theme with:  :root { --wb-fav-color: #c00; }
+ */
+
+:root {
+  --wb-fav-color: #e63946;
+  --wb-fav-btn-bg: #fff;
+  --wb-fav-btn-color: #6c757d;
+}
+
+/* ---------------------------------------------------------------- Heart button */
+.wb-fav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--wb-fav-btn-bg);
+  color: var(--wb-fav-btn-color);
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .15);
+  transition: color .15s ease-in-out, transform .15s ease-in-out;
+}
+
+.wb-fav-btn:hover,
+.wb-fav-btn:focus {
+  color: var(--wb-fav-color);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.wb-fav-btn[data-active="true"] {
+  color: var(--wb-fav-color);
+}
+
+.wb-fav-btn__icon {
+  display: none;
+}
+
+.wb-fav-btn__icon svg {
+  display: block;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.wb-fav-btn__icon--added svg {
+  fill: currentColor;
+}
+
+.wb-fav-btn__icon--add svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.wb-fav-btn[data-active="true"] .wb-fav-btn__icon--added {
+  display: block;
+}
+
+.wb-fav-btn[data-active="false"] .wb-fav-btn__icon--add {
+  display: block;
+}
+
+/* Labeled variant (product page) */
+.wb-fav-btn--labeled {
+  width: auto;
+  height: auto;
+  padding: .5rem 1rem;
+  border-radius: 2rem;
+}
+
+.wb-fav-btn__label {
+  display: none;
+  font-size: .95rem;
+  white-space: nowrap;
+}
+
+.wb-fav-btn[data-active="true"] .wb-fav-btn__label--added {
+  display: inline;
+}
+
+.wb-fav-btn[data-active="false"] .wb-fav-btn__label--add {
+  display: inline;
+}
+
+.wb-fav-product-action {
+  display: inline-block;
+}
+
+/* ----------------------------------------------------------- Header counter */
+.wb-fav-top {
+  display: inline-flex;
+}
+
+.wb-fav-top__link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.wb-fav-top__icon {
+  display: inline-flex;
+}
+
+.wb-fav-top__icon svg {
+  display: block;
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: currentColor;
+}
+
+.wb-fav-top__badge {
+  position: absolute;
+  top: -.4rem;
+  right: -.6rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 .25rem;
+  border-radius: .55rem;
+  background: var(--wb-fav-color);
+  color: #fff;
+  font-size: .7rem;
+  font-weight: 600;
+  line-height: 1.1rem;
+  text-align: center;
+}
+
+/* -------------------------------------------------------------------- Toasts */
+.wb-fav-toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1080;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  max-width: 90vw;
+}
+
+.wb-fav-toast {
+  min-width: 16rem;
+  padding: .75rem 1rem;
+  border-radius: .375rem;
+  background: #198754;
+  color: #fff;
+  font-size: .9rem;
+  box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+  opacity: 0;
+  transform: translateY(-.5rem);
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.wb-fav-toast.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.wb-fav-toast--error {
+  background: #dc3545;
+}
+
+/* -------------------------------------------------------- Cart up-selling block */
+.wb-fav-upsell {
+  margin-top: 1.5rem;
+}
+
+.wb-fav-upsell__title {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.wb-fav-card {
+  display: block;
+  height: 100%;
+}
+
+.wb-fav-card__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.wb-fav-card__img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.wb-fav-card__name {
+  display: block;
+  margin-top: .5rem;
+  font-size: .9rem;
+  line-height: 1.3;
+}
+
+.wb-fav-card__price {
+  display: block;
+  margin-top: .25rem;
+  font-weight: 600;
+}
+
+/* Self-contained grid (module-scoped classes so they never clash with the theme's
+   own Bootstrap `.row`/`.col`). Works with or without Bootstrap 5 on the page. */
+.wb-fav-upsell__grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -.5rem;
+}
+
+.wb-fav-upsell__col {
+  flex: 0 0 50%;
+  max-width: 50%;
+  padding: .5rem;
+}
+
+@media (min-width: 768px) {
+  .wb-fav-upsell__col {
+    flex-basis: 25%;
+    max-width: 25%;
+  }
+}

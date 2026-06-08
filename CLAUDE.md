@@ -12,10 +12,11 @@ up-selling block, product-page / miniature buttons, a header counter, plus a bac
 list and per-product / per-customer statistics.
 
 It was **forked from** the open-source `is_favoriteproducts` module by Igor Stępień
-(Oksydan), which was written specifically for the **Falcon theme**. Our long-term goal is
-to make it **theme-independent**. The current code still carries Falcon coupling — see
-`docs/theme-coupling.md` for the exhaustive inventory and decoupling checklist. **This is
-the single most important document for the project's direction.**
+(Oksydan), which was written specifically for the **Falcon theme**. The front-end has since
+been **decoupled from the theme**: the module ships its own CSS/JS, inline SVG icons, a
+self-contained Bootstrap 5-friendly markup, and a vanilla-JS (`fetch`) client that only
+*optionally* uses PrestaShop's core `prestashop` event hub (feature-detected). See
+`docs/theme-coupling.md` for what was changed and the few remaining notes.
 
 ## Identity / naming (all renamed from the upstream)
 
@@ -54,10 +55,11 @@ names from these strings, so a mismatch silently breaks hooks.
 - **Storage**: logged-in → table `{prefix}favorite_product`; guest → JSON cookie
   `favorite_products` (30-day, 20-item guest limit). On login, guest favorites are merged
   into the DB (`actionAuthentication`). See `docs/data-model.md`.
-- **Front behaviour**: `actionFrontControllerSetMedia` pushes AJAX URLs + initial favorite
-  list + `isFavoriteProductsListingPage` via `Media::addJsDef`. The AJAX controller
-  (`controllers/front/ajax.php`) handles add/remove/refresh and returns JSON including
-  re-rendered hook HTML (`topContent`). JS lives in `_theme_dev/`. See `docs/frontend.md`.
+- **Front behaviour**: `actionFrontControllerSetMedia` registers the module's own
+  `views/css/wb_favoriteproducts.css` + `views/js/wb_favoriteproducts.js` and pushes AJAX
+  URLs + initial favorite list + `isFavoriteProductsListingPage` via `Media::addJsDef`. The
+  AJAX controller (`controllers/front/ajax.php`) handles add/remove/refresh and returns JSON
+  including re-rendered hook HTML (`topContent`). See `docs/frontend.md`.
 
 ## Commands
 
@@ -65,13 +67,13 @@ names from these strings, so a mismatch silently breaks hooks.
 # PHP autoloader (REQUIRED before the module can load — it throws without vendor/autoload.php)
 composer install --no-dev          # or: composer dump-autoload --no-dev
 
-# Front-end assets (built against the theme's webpack/sass config — see theme-coupling)
-cd _theme_dev && yarn && yarn build
-
 # Lint
 composer exec php-cs-fixer fix     # config: .php-cs-fixer.dist.php
-cd _theme_dev && yarn js-lint && yarn scss-lint
+node --check views/js/wb_favoriteproducts.js
 ```
+
+Front-end assets are plain hand-written files (`views/css/`, `views/js/`) — **no build
+step**, no `_theme_dev/`. Edit them directly.
 
 PHP CLI on this machine: `D:/wamp64/bin/php/php8.3.14/php.exe`. Quick syntax check:
 `find . -name '*.php' -not -path './vendor/*' -exec <php> -l {} \;`
@@ -99,7 +101,7 @@ PHP CLI on this machine: `D:/wamp64/bin/php/php8.3.14/php.exe`. Quick syntax che
 - `docs/data-model.md` — DB schema, cookie format, DTO/Entity/Mapper, guest↔customer merge
 - `docs/hooks.md` — every registered hook, its job and template
 - `docs/frontend.md` — JS modules, `addJsDef` vars, AJAX endpoints, prestashop events
-- `docs/theme-coupling.md` — **decoupling roadmap** (Falcon dependencies, by category)
+- `docs/theme-coupling.md` — what was decoupled from Falcon + the few remaining notes
 - `docs/admin.md` — back-office grid, product tab stats, customer tab, route/controller
 - `docs/ps8-vs-ps9.md` — PrestaShop 8 vs 9 compatibility notes
 - `docs/rename-map.md` — exact upstream→WB identifier mapping (fork provenance)
