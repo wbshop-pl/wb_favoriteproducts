@@ -1,0 +1,39 @@
+imports:
+  - { resource: ../common.yml }
+
+services:
+  _defaults:
+    public: false
+    autoconfigure: true
+    autowire: true
+    bind:
+      $module: '@wbshop.wb_favoriteproducts.module'
+      $context: '@wbshop.wb_favoriteproducts.context'
+      $dbPrefix: '%database_prefix%'
+      $cacheableHooksCollection: !tagged wbshop.wb_favoriteproducts.cacheable_hook
+
+  _instanceof:
+    WbShop\WbFavoriteProducts\Hook\AbstractCacheableDisplayHook:
+      tags: [ 'wbshop.wb_favoriteproducts.cacheable_hook' ]
+
+  WbShop\WbFavoriteProducts\:
+    resource: '../../src/*'
+    exclude:
+      - '../../src/{DTO,Entity,Form}'
+      - '../../src/index.php'
+      - '../../src/*/index.php'
+
+  WbShop\WbFavoriteProducts\Hook\:
+    public: true
+    resource: '../../src/Hook/*'
+    exclude:
+      - '../../src/Hook/{DisplayAdminCustomers.php,AbstractDisplayAdminHook.php,ActionProductFormBuilderModifier.php,DisplayAdminProductsExtra.php}'
+      - '../../src/Hook/index.php'
+
+  WbShop\WbFavoriteProducts\Services\FavoriteProductService:
+    public: true
+    class: WbShop\WbFavoriteProducts\Services\FavoriteProductService
+
+  WbShop\WbFavoriteProducts\ProductSearchProvider\FavoriteProductsSearchProvider:
+    public: true
+    class: WbShop\WbFavoriteProducts\ProductSearchProvider\FavoriteProductsSearchProvider

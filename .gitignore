@@ -1,0 +1,31 @@
+# Internal working docs — not part of the distributed module (CLAUDE.md IS committed)
+/docs/
+
+# PrestaShop runtime cache / config
+config.xml
+config_*.xml
+
+# Node / front-end build
+node_modules/
+_theme_dev/node_modules/
+yarn-error.log
+npm-debug.log*
+
+# Composer: vendor/ IS committed on purpose (ships the PSR-4 autoloader so the
+# module installs without a composer step). Only ignore Composer caches.
+.composer/
+
+# Tooling caches
+.php-cs-fixer.cache
+.phpstan_bootstrap_config.php
+tests/.env
+
+# Packaged module archives
+*.zip
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

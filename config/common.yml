@@ -1,0 +1,14 @@
+services:
+  _defaults:
+    public: false
+
+  wbshop.wb_favoriteproducts.module:
+    class: Wb_favoriteproducts
+    factory: [ 'Module', 'getInstanceByName' ]
+    public: false
+    arguments:
+      - 'wb_favoriteproducts'
+
+  wbshop.wb_favoriteproducts.context:
+    class: Context
+    factory: [ '\Context', getContext ]

@@ -1,0 +1,5 @@
+wb_favoriteproducts_controller_index:
+    path: /wb_favoriteproducts/index
+    methods: [GET]
+    defaults:
+        _controller: 'WbShop\WbFavoriteProducts\Controller\AdminFavoriteController::indexAction'
