@@ -49,15 +49,35 @@ class FavoriteProductCookieRepository
 
         $cookieProductsRaw = json_decode($favoriteProducts, true);
 
+        // Tampered / corrupted cookies must not break the page.
+        if (!is_array($cookieProductsRaw)) {
+            return $products;
+        }
+
         foreach ($cookieProductsRaw as $cookieProductRaw) {
-            if ($cookieProductRaw['id_shop'] !== $idShop) {
+            if (!isset(
+                $cookieProductRaw['id_product'],
+                $cookieProductRaw['id_product_attribute'],
+                $cookieProductRaw['id_shop'],
+                $cookieProductRaw['date_add']
+            )) {
+                continue;
+            }
+
+            if ((int) $cookieProductRaw['id_shop'] !== $idShop) {
+                continue;
+            }
+
+            $dateAdd = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, (string) $cookieProductRaw['date_add']);
+
+            if (false === $dateAdd) {
                 continue;
             }
 
             $product = new FavoriteProduct();
-            $product->setIdProduct($cookieProductRaw['id_product']);
-            $product->setIdProductAttribute($cookieProductRaw['id_product_attribute']);
-            $product->setDateAdd(\DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $cookieProductRaw['date_add']));
+            $product->setIdProduct((int) $cookieProductRaw['id_product']);
+            $product->setIdProductAttribute((int) $cookieProductRaw['id_product_attribute']);
+            $product->setDateAdd($dateAdd);
             $product->setIdShop($idShop);
 
             $products[] = $product;

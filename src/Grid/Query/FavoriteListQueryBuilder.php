@@ -13,28 +13,10 @@ use PrestaShop\PrestaShop\Core\Grid\Search\SearchCriteriaInterface;
 
 final class FavoriteListQueryBuilder extends AbstractDoctrineQueryBuilder
 {
-    /**
-     * @var Context
-     */
     private Context $contextAdapter;
-
-    /**
-     * @var \Context
-     */
     private \Context $context;
-
-    /**
-     * @var Configuration
-     */
     private Configuration $configuration;
 
-    /**
-     * MenuListQueryBuilder constructor.
-     *
-     * @param Connection $connection
-     * @param $dbPrefix
-     * @param Context $contextAdapter
-     */
     public function __construct(
         Connection $connection,
         $dbPrefix,
@@ -110,19 +92,26 @@ final class FavoriteListQueryBuilder extends AbstractDoctrineQueryBuilder
             ->createQueryBuilder()
             ->from($this->dbPrefix . 'favorite_product', 'fp');
 
+        // Values are cast to int before concatenation (DBAL andWhere() does not bind them).
+        $idLang = (int) $this->context->language->id;
+
         if (\Shop::isFeatureActive() && !$this->contextAdapter->isAllShopContext()) {
+            $idShop = (int) $this->contextAdapter->getContextShopID();
+
             $qb->join('fp', $this->dbPrefix . 'product_shop', 'p', 'p.id_product = fp.id_product')
                 ->join('p', $this->dbPrefix . 'product_lang', 'pl', 'pl.id_product = p.id_product')
-                ->andWhere('p.id_shop = ' . $this->contextAdapter->getContextShopID())
-                ->andWhere('pl.id_shop = ' . $this->contextAdapter->getContextShopID())
-                ->andWhere('pl.id_lang = ' . $this->context->language->id)
+                ->andWhere('p.id_shop = ' . $idShop)
+                ->andWhere('pl.id_shop = ' . $idShop)
+                ->andWhere('pl.id_lang = ' . $idLang)
                 ->andWhere('p.id_product IS NOT NULL');
         } else {
+            $idShop = (int) $this->configuration->get('PS_SHOP_DEFAULT');
+
             $qb->join('fp', $this->dbPrefix . 'product_shop', 'p', 'p.id_product = fp.id_product')
                 ->join('p', $this->dbPrefix . 'product_lang', 'pl', 'pl.id_product = p.id_product')
-                ->andWhere('p.id_shop = ' . $this->configuration->get('PS_SHOP_DEFAULT'))
-                ->andWhere('pl.id_shop = ' . $this->configuration->get('PS_SHOP_DEFAULT'))
-                ->andWhere('pl.id_lang = ' . $this->context->language->id)
+                ->andWhere('p.id_shop = ' . $idShop)
+                ->andWhere('pl.id_shop = ' . $idShop)
+                ->andWhere('pl.id_lang = ' . $idLang)
                 ->andWhere('p.id_product IS NOT NULL');
         }
 

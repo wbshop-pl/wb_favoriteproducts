@@ -9,25 +9,10 @@ use WbShop\WbFavoriteProducts\DTO\FavoriteProduct as FavoriteProductDTO;
 
 class FavoriteProductLegacyRepository
 {
-    /**
-     * @var Connection
-     */
     private Connection $connection;
-
-    /**
-     * @var string
-     */
     private string $dbPrefix;
-
-    /**
-     * @var string
-     */
     private string $table;
 
-    /**
-     * @param Connection $connection
-     * @param string $dbPrefix
-     */
     public function __construct(Connection $connection, string $dbPrefix)
     {
         $this->connection = $connection;
@@ -58,6 +43,11 @@ class FavoriteProductLegacyRepository
         string $orderWay,
         array $excludeProducts = []
     ): array {
+        // DBAL orderBy() concatenates its arguments into SQL, so whitelist them.
+        $allowedOrderBy = ['date_add', 'id_product', 'id_product_attribute'];
+        $orderBy = in_array($orderBy, $allowedOrderBy, true) ? $orderBy : 'date_add';
+        $orderWay = strtoupper($orderWay) === 'ASC' ? 'ASC' : 'DESC';
+
         $qb = $this->connection->createQueryBuilder();
 
         $qb
@@ -123,13 +113,18 @@ class FavoriteProductLegacyRepository
             ->andWhere('ps.visibility != \'none\'');
 
         if (!empty($excludeProducts)) {
+            $productKeys = [];
             foreach ($excludeProducts as $excludeProduct) {
-                $qb
-                    ->andWhere('fp.id_product != :id_product_' . $excludeProduct->getIdProduct())
-                    ->andWhere('fp.id_product_attribute != :id_product_attribute_' . $excludeProduct->getIdProductAttribute())
-                    ->setParameter('id_product_' . $excludeProduct->getIdProduct(), $excludeProduct->getIdProduct())
-                    ->setParameter('id_product_attribute_' . $excludeProduct->getIdProductAttribute(), $excludeProduct->getIdProductAttribute());
+                $key = $excludeProduct->getIdProduct() . '_' . $excludeProduct->getIdProductAttribute();
+
+                if (!in_array($key, $productKeys, true)) {
+                    $productKeys[] = $key;
+                }
             }
+
+            $qb
+                ->andWhere('CONCAT(fp.id_product, \'_\', fp.id_product_attribute) NOT IN (:product_keys)')
+                ->setParameter('product_keys', $productKeys, Connection::PARAM_STR_ARRAY);
         }
 
         return (int) $qb->execute()->fetchOne();

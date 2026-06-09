@@ -63,29 +63,19 @@ class AdminFavoriteController extends FrameworkBundleAdminController
 
         switch ($dateRange) {
             case DateFiltersProvider::LAST_24_HOURS:
-                $favoriteListFilters->addFilter([
-                    'data_add' => $dateTime->modify('-1 day'),
-                ]);
+                $dateTime->modify('-1 day');
                 break;
             case DateFiltersProvider::LAST_3_DAYS:
-                $favoriteListFilters->addFilter([
-                    'date_add' => $dateTime->modify('-3 days'),
-                ]);
+                $dateTime->modify('-3 days');
                 break;
             case DateFiltersProvider::LAST_7_DAYS:
-                $favoriteListFilters->addFilter([
-                    'date_add' => $dateTime->modify('-7 days'),
-                ]);
+                $dateTime->modify('-7 days');
                 break;
             case DateFiltersProvider::LAST_30_DAYS:
-                $favoriteListFilters->addFilter([
-                    'date_add' => $dateTime->modify('-30 days'),
-                ]);
+                $dateTime->modify('-30 days');
                 break;
             case DateFiltersProvider::LAST_90_DAYS:
-                $favoriteListFilters->addFilter([
-                    'date_add' => $dateTime->modify('-90 days'),
-                ]);
+                $dateTime->modify('-90 days');
                 break;
         }
 

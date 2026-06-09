@@ -15,39 +15,12 @@ use WbShop\WbFavoriteProducts\Repository\ProductLegacyRepository;
 
 class FavoriteProductService
 {
-    /*
-     * Context
-     */
     private \Context $context;
-
-    /*
-     * @var FavoriteProductRepository
-     */
     private FavoriteProductRepository $favoriteProductsRepository;
-
-    /*
-     * @var FavoriteProductLegacyRepository
-     */
     private FavoriteProductLegacyRepository $favoriteProductsRepositoryLegacy;
-
-    /*
-     * @var FavoriteProductsCookieRepository
-     */
     private FavoriteProductCookieRepository $favoriteProductsCookieRepository;
-
-    /*
-     * @var ProductRepository
-     */
     private ProductLegacyRepository $productRepository;
-
-    /*
-     * @var FavoriteProductMapper
-     */
     private FavoriteProductMapper $favoriteProductMapper;
-
-    /*
-     * @var TemplateCache
-     */
     private TemplateCache $templateCache;
 
     protected $cachedFavoriteProducts = null;

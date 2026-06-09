@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace WbShop\WbFavoriteProducts\ProductSearchProvider;
 
 use WbShop\WbFavoriteProducts\Services\FavoriteProductService;
