@@ -1,0 +1,73 @@
+name: Release
+
+# Triggered by pushing a version tag, e.g. v1.0.0 (must match $this->version in
+# wb_favoriteproducts.php). Builds an installable PrestaShop ZIP (with the module
+# folder at the archive root) and attaches it to a GitHub Release.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and publish module ZIP
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+
+      - name: Install production dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+
+      - name: Resolve version and tag
+        id: meta
+        run: |
+          VERSION=$(sed -n "s/.*\$this->version *= *'\([^']*\)'.*/\1/p" wb_favoriteproducts.php)
+          TAG="${GITHUB_REF_NAME#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Module version: $VERSION | tag: $TAG"
+
+      - name: Verify tag matches module version
+        run: |
+          if [ "${{ steps.meta.outputs.version }}" != "${{ steps.meta.outputs.tag }}" ]; then
+            echo "::error::Tag v${{ steps.meta.outputs.tag }} does not match module version ${{ steps.meta.outputs.version }}"
+            exit 1
+          fi
+
+      - name: Stage module folder
+        run: |
+          mkdir -p dist/wb_favoriteproducts
+          rsync -a ./ dist/wb_favoriteproducts/ \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='docs' \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='*.zip' \
+            --exclude='.gitignore' \
+            --exclude='.gitattributes' \
+            --exclude='.php-cs-fixer.dist.php' \
+            --exclude='.php-cs-fixer.cache' \
+            --exclude='Makefile'
+
+      - name: Create ZIP
+        run: |
+          cd dist
+          zip -r -q "../wb_favoriteproducts-${{ steps.meta.outputs.version }}.zip" wb_favoriteproducts
+          cd ..
+          ls -lh wb_favoriteproducts-*.zip
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: wb_favoriteproducts-${{ steps.meta.outputs.version }}.zip
+          generate_release_notes: true
