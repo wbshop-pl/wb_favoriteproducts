@@ -60,12 +60,19 @@ final class FavoriteListQueryBuilder extends AbstractDoctrineQueryBuilder
         $qb->select('fp.id_product, COUNT(fp.id_product) as count, pl.name');
 
         // We need to sort it only by count
-        $qb->orderBy(
-            $searchCriteria->getOrderBy(),
-            'DESC',
-        )
-        ->setFirstResult($searchCriteria->getOffset())
-        ->setMaxResults($searchCriteria->getLimit());
+        $orderBy = $searchCriteria->getOrderBy();
+        if (!empty($orderBy)) {
+            $qb->orderBy($orderBy, 'DESC');
+        }
+
+        // Doctrine DBAL 3/4 (PrestaShop 9) types these strictly and rejects null,
+        // so coalesce the offset to 0 and only set a max result when a limit exists.
+        $qb->setFirstResult((int) $searchCriteria->getOffset());
+
+        $limit = $searchCriteria->getLimit();
+        if (null !== $limit) {
+            $qb->setMaxResults((int) $limit);
+        }
 
         return $this->applyFilters($qb, $searchCriteria);
     }
