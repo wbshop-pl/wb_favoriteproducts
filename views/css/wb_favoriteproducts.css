@@ -7,9 +7,9 @@
  */
 
 :root {
-  --wb-fav-color: #e63946;
+  --wb-fav-color: #b71029;
   --wb-fav-btn-bg: #fff;
-  --wb-fav-btn-color: #6c757d;
+  --wb-fav-btn-color: #212529;
 }
 
 /* ---------------------------------------------------------------- Heart button */
@@ -50,18 +50,22 @@
 
 .wb-fav-btn__icon svg {
   display: block;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke-width: 1.7;
+  overflow: visible;
 }
 
-.wb-fav-btn__icon--added svg {
-  fill: currentColor;
-}
-
+/* Unselected = outline heart */
 .wb-fav-btn__icon--add svg {
   fill: none;
   stroke: currentColor;
-  stroke-width: 2;
+}
+
+/* Selected = filled heart (uses the accent colour via currentColor) */
+.wb-fav-btn__icon--added svg {
+  fill: currentColor;
+  stroke: currentColor;
 }
 
 .wb-fav-btn[data-active="true"] .wb-fav-btn__icon--added {
@@ -119,7 +123,9 @@
   display: block;
   width: 1.5rem;
   height: 1.5rem;
-  fill: currentColor;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
 }
 
 .wb-fav-top__badge {
@@ -242,7 +248,9 @@
 .wb-fav-account-link__icon svg {
   width: 1.5rem;
   height: 1.5rem;
-  fill: currentColor;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
 }
 
 .wb-fav-account-link__count {
