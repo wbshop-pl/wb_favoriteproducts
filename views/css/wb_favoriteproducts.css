@@ -18,8 +18,8 @@
   align-items: center;
   justify-content: center;
   gap: .4rem;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3rem;
+  height: 3rem;
   padding: 0;
   margin: 0;
   border: 0;
@@ -50,8 +50,8 @@
 
 .wb-fav-btn__icon svg {
   display: block;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2rem;
+  height: 2rem;
   stroke-width: 1.7;
   overflow: visible;
 }
@@ -121,8 +121,8 @@
 
 .wb-fav-top__icon svg {
   display: block;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2rem;
+  height: 2rem;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.7;
@@ -246,8 +246,8 @@
 }
 
 .wb-fav-account-link__icon svg {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2rem;
+  height: 2rem;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.7;
@@ -255,4 +255,56 @@
 
 .wb-fav-account-link__count {
   opacity: .7;
+}
+
+/* ----------------------------------------------------- Favorites page (/favoriteproducts) */
+.wb-fav-page {
+  margin-top: 1rem;
+}
+
+.wb-fav-page__sidebar {
+  margin-bottom: 1.5rem;
+}
+
+.wb-fav-account-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, .1);
+  border-radius: .375rem;
+  overflow: hidden;
+}
+
+.wb-fav-account-links__item + .wb-fav-account-links__item {
+  border-top: 1px solid rgba(0, 0, 0, .08);
+}
+
+.wb-fav-account-links__item a {
+  display: block;
+  padding: .65rem 1rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.wb-fav-account-links__item a:hover,
+.wb-fav-account-links__item a:focus {
+  background: rgba(0, 0, 0, .03);
+  color: var(--wb-fav-color);
+}
+
+.wb-fav-account-links__item--active a {
+  font-weight: 600;
+  color: var(--wb-fav-color);
+  border-left: 3px solid var(--wb-fav-color);
+}
+
+.wb-fav-page__intro {
+  margin-bottom: 1.25rem;
+  padding: .75rem 1rem;
+  background: rgba(0, 0, 0, .03);
+  border-radius: .375rem;
+}
+
+.wb-fav-page__empty {
+  margin: 2rem 0;
 }

@@ -25,12 +25,33 @@ class Wb_favoriteproductsFavoriteModuleFrontController extends ProductListingFro
 
     public function getListingLabel()
     {
-        return $this->module->getTranslator()->trans('Favorite products', [], 'Modules.Wbfavoriteproducts.Front');
+        return $this->module->getTranslator()->trans('Ulubione produkty', [], 'Modules.Wbfavoriteproducts.Front');
+    }
+
+    public function getBreadcrumbLinks()
+    {
+        $breadcrumb = parent::getBreadcrumbLinks();
+
+        $breadcrumb['links'][] = [
+            'title' => $this->getTranslator()->trans('My account', [], 'Shop.Theme.Customeraccount'),
+            'url' => $this->context->link->getPageLink('my-account'),
+        ];
+
+        $breadcrumb['links'][] = [
+            'title' => $this->getListingLabel(),
+            'url' => $this->context->link->getModuleLink($this->module->name, 'favorite'),
+        ];
+
+        return $breadcrumb;
     }
 
     public function initContent()
     {
         parent::initContent();
+
+        $this->context->smarty->assign([
+            'favoritePageUrl' => $this->context->link->getModuleLink($this->module->name, 'favorite'),
+        ]);
 
         $this->doProductSearch("module:{$this->module->name}/views/templates/front/favorite.tpl");
     }
