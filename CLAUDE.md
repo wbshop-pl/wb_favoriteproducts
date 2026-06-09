@@ -53,8 +53,12 @@ names from these strings, so a mismatch silently breaks hooks.
   `Form/` (product tab), `Controller/AdminFavoriteController`, `Cache/TemplateCache`,
   `ProductSearchProvider/` (powers the listing page).
 - **Storage**: logged-in → table `{prefix}favorite_product`; guest → JSON cookie
-  `favorite_products` (30-day, 20-item guest limit). On login, guest favorites are merged
+  `favorite_products` (90-day, 20-item guest limit). On login, guest favorites are merged
   into the DB (`actionAuthentication`). See `docs/data-model.md`.
+- **Friendly URL**: `moduleRoutes` hook maps `/favoriteproducts` → the `favorite` FO
+  controller (editable in BO > Traffic & SEO when friendly URLs are on).
+- **Customer account**: `displayCustomerAccount` hook adds a "Favorite products" link to
+  the customer My-account page.
 - **Front behaviour**: `actionFrontControllerSetMedia` registers the module's own
   `views/css/wb_favoriteproducts.css` + `views/js/wb_favoriteproducts.js` and pushes AJAX
   URLs + initial favorite list + `isFavoriteProductsListingPage` via `Media::addJsDef`. The

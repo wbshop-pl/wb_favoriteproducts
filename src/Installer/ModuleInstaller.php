@@ -7,7 +7,9 @@ namespace WbShop\WbFavoriteProducts\Installer;
 class ModuleInstaller
 {
     public const HOOKS_LIST = [
+        'moduleRoutes',
         'displayTop',
+        'displayCustomerAccount',
         'actionFrontControllerSetMedia',
         'actionAuthentication',
         'displayProductFavoriteButton',

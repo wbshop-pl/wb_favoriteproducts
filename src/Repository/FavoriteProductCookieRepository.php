@@ -13,6 +13,7 @@ class FavoriteProductCookieRepository
 {
     const COOKIE_NAME = 'favorite_products';
     const DATE_FORMAT = 'Y-m-d H:i:s';
+    const COOKIE_LIFETIME_DAYS = 90;
 
     /**
      * @var Response
@@ -102,7 +103,7 @@ class FavoriteProductCookieRepository
         $this->response->headers->setCookie(new Cookie(
             self::COOKIE_NAME,
             json_encode($cookieProducts),
-            (new \DateTime('now'))->modify('+ 30 days')->getTimestamp()
+            (new \DateTime('now'))->modify('+ ' . self::COOKIE_LIFETIME_DAYS . ' days')->getTimestamp()
         ));
 
         $this->response->sendHeaders();

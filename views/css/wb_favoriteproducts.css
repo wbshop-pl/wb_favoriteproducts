@@ -232,3 +232,19 @@
     max-width: 25%;
   }
 }
+
+/* ------------------------------------------------- Customer "My account" link */
+.wb-fav-account-link__icon {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.wb-fav-account-link__icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: currentColor;
+}
+
+.wb-fav-account-link__count {
+  opacity: .7;
+}
