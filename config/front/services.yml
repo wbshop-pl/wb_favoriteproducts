@@ -19,7 +19,11 @@ services:
   WbShop\WbFavoriteProducts\:
     resource: '../../src/*'
     exclude:
-      - '../../src/{DTO,Entity,Form}'
+      # Admin-only layers must not be auto-registered in the front container:
+      # their dependencies (e.g. GridDataFactoryInterface) are only wired in
+      # config/admin/services.yml, so autowiring them here breaks compilation.
+      - '../../src/{DTO,Entity,Form,Grid,Controller,Collection,Provider}'
+      - '../../src/Presenter/Admin'
       - '../../src/index.php'
       - '../../src/*/index.php'
 

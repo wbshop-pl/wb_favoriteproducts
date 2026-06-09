@@ -31,7 +31,7 @@ self-contained Bootstrap 5-friendly markup, and a vanilla-JS (`fetch`) client th
 | Admin route | `wb_favoriteproducts_controller_index` |
 | Composer package | `wbshop/wb_favoriteproducts` |
 | Author | `WBShop.pl` |
-| Version | `1.0.0` (reset for the WB baseline; upstream upgrade script removed) |
+| Version | `1.0.1` (WB baseline started at 1.0.0; upstream upgrade script removed) |
 | License | `GPL-3.0-or-later` — `LICENSE.md` (same as the upstream module; keep it) |
 
 Releasing: bump `$this->version` in `wb_favoriteproducts.php`, then push a matching
