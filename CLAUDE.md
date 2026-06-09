@@ -32,6 +32,11 @@ self-contained Bootstrap 5-friendly markup, and a vanilla-JS (`fetch`) client th
 | Composer package | `wbshop/wb_favoriteproducts` |
 | Author | `WBShop.pl` |
 | Version | `1.0.0` (reset for the WB baseline; upstream upgrade script removed) |
+| License | `GPL-3.0-or-later` — `LICENSE.md` (same as the upstream module; keep it) |
+
+Releasing: bump `$this->version` in `wb_favoriteproducts.php`, then push a matching
+`v<version>` tag. `.github/workflows/release.yml` verifies the tag == version, builds the
+installable ZIP (module folder at the archive root) and publishes a GitHub Release.
 
 When adding code, keep these consistent. The hook dispatch and DI config derive class
 names from these strings, so a mismatch silently breaks hooks.
@@ -97,7 +102,15 @@ PHP CLI on this machine: `D:/wamp64/bin/php/php8.3.14/php.exe`. Quick syntax che
 - The two `controllers/front/*.php` classes are **legacy-style** (not in `src/`, no
   namespace) because PrestaShop's FO dispatcher requires the
   `<ModuleName><Controller>ModuleFrontController` naming and file location.
-- PS9 compatibility is a known work item, not yet verified end-to-end. See `docs/ps8-vs-ps9.md`.
+- **SQL safety**: bind/parameterize or cast `(int)` every value going into a `DbQuery` /
+  DBAL builder. `orderBy` column names cannot be bound — whitelist them (see
+  `FavoriteProductLegacyRepository`). DBAL 3/4 (PS9) types `setFirstResult()` strictly —
+  never pass `null`.
+- **Template output**: Smarty does not auto-escape — use `|escape:'html':'UTF-8'` on any
+  product/customer data printed in the module's own `.tpl` files.
+- **CI**: `.github/workflows/ci.yml` PHP-lints (8.1–8.3) and checks the JS on push/PR.
+- PS8 works; PS9 is largely verified (BO grid DBAL fix applied) but exercise the full flow
+  on a real PS9 shop. See `docs/ps8-vs-ps9.md`.
 
 ## Where to read more (local `docs/`, not in git)
 
