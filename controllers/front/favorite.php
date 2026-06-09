@@ -25,7 +25,7 @@ class Wb_favoriteproductsFavoriteModuleFrontController extends ProductListingFro
 
     public function getListingLabel()
     {
-        return $this->module->getTranslator()->trans('Ulubione produkty', [], 'Modules.Wbfavoriteproducts.Front');
+        return $this->module->getTranslator()->trans('Favorite products', [], 'Modules.Wbfavoriteproducts.Front');
     }
 
     public function getBreadcrumbLinks()

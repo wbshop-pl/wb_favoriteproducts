@@ -13,7 +13,7 @@
 {extends file='page.tpl'}
 
 {block name='page_title'}
-  {l s='Ulubione produkty' d='Modules.Wbfavoriteproducts.Front'}
+  {l s='Favorite products' d='Modules.Wbfavoriteproducts.Front'}
 {/block}
 
 {block name='page_content'}
@@ -39,7 +39,7 @@
           <a href="{$urls.pages.discount}">{l s='Vouchers' d='Shop.Theme.Customeraccount'}</a>
         </li>
         <li class="wb-fav-account-links__item wb-fav-account-links__item--active">
-          <a href="{$favoritePageUrl}" aria-current="page">{l s='Ulubione produkty' d='Modules.Wbfavoriteproducts.Front'}</a>
+          <a href="{$favoritePageUrl}" aria-current="page">{l s='Favorite products' d='Modules.Wbfavoriteproducts.Front'}</a>
         </li>
       </ul>
     </aside>
@@ -47,11 +47,11 @@
     <div class="col-12 col-lg-9 wb-fav-page__main">
       {if $customer.is_logged && !$customer.is_guest}
         <p class="wb-fav-page__intro">
-          {l s='Przeglądaj swoje zapisane produkty i dodaj je do koszyka w dowolnym momencie z tego miejsca.' d='Modules.Wbfavoriteproducts.Front'}
+          {l s='Browse your saved products and add them to the cart at any time from here.' d='Modules.Wbfavoriteproducts.Front'}
         </p>
       {else}
         <p class="wb-fav-page__intro">
-          {l s='Produkty dodane do ulubionych są przechowywane przez 90 dni. Załóż konto lub zaloguj się, aby zachować je na stałe.' d='Modules.Wbfavoriteproducts.Front'}
+          {l s='Products added to your favorites are kept for 90 days. Create an account or sign in to keep them permanently.' d='Modules.Wbfavoriteproducts.Front'}
         </p>
       {/if}
 
@@ -67,7 +67,7 @@
         {/block}
       {else}
         <p class="wb-fav-page__empty">
-          {l s='Nie masz jeszcze żadnych ulubionych produktów.' d='Modules.Wbfavoriteproducts.Front'}
+          {l s='You don\'t have any favorite products yet.' d='Modules.Wbfavoriteproducts.Front'}
         </p>
       {/if}
     </div>
