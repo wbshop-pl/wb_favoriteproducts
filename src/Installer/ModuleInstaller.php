@@ -17,7 +17,6 @@ class ModuleInstaller
         'displayCrossSellingShoppingCart',
         'actionCartSave',
         'displayAdminCustomers',
-        'actionProductFormBuilderModifier',
         'displayAdminProductsExtra',
     ];
 
