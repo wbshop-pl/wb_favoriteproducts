@@ -50,6 +50,26 @@ class FavoriteProductRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
+    /**
+     * Remove several favorite products in a single flush (used to purge orphaned entries).
+     *
+     * @param FavoriteProduct[] $favoriteProducts
+     */
+    public function removeFavoriteProducts(array $favoriteProducts): void
+    {
+        if (empty($favoriteProducts)) {
+            return;
+        }
+
+        $entityManager = $this->getEntityManager();
+
+        foreach ($favoriteProducts as $favoriteProduct) {
+            $entityManager->remove($favoriteProduct);
+        }
+
+        $entityManager->flush();
+    }
+
     public function isProductAlreadyInFavorites(int $id_product, int $id_product_attribute, int $id_customer, int $id_shop): bool
     {
         $qb = $this->createQueryBuilder('fp');

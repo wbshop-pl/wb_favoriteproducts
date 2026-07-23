@@ -12,7 +12,6 @@ services:
       $context: '@wbshop.wb_favoriteproducts.context'
       $dbPrefix: '%database_prefix%'
       $cacheableHooksCollection: !tagged wbshop.wb_favoriteproducts.cacheable_hook
-      $formBuilderModifier: '@form.form_builder_modifier'
       $locales: '@=service("prestashop.adapter.legacy.context").getLanguages()'
       $favoriteListDataFactory: '@wbshop.wb_favoriteproducts.grid.data.factory.favorite_list_data_factory'
       $contextAdapter: '@prestashop.adapter.shop.context'

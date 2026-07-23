@@ -57,31 +57,134 @@ class FavoriteProductService
         }
 
         if ($this->isCustomerLogged()) {
-            $favoriteProducts = $this->favoriteProductsRepository->getFavoriteProductsByCustomer(
-                (int) $this->context->customer->id,
-                (int) $this->context->shop->id
-            );
-
-            $products = array_map(function (FavoriteProduct $favoriteProduct) {
-                return $this->favoriteProductMapper->mapFavoriteProductEntityToFavoriteProductDTO($favoriteProduct);
-            }, $favoriteProducts);
-
-            $this->cachedFavoriteProducts = $products;
+            $this->cachedFavoriteProducts = $this->getCustomerFavoriteProducts();
         } else {
-            $products = $this->favoriteProductsCookieRepository->getFavoriteProducts((int) $this->context->shop->id);
-
-            $products = array_filter($products, function ($product) {
-                return $this->productRepository->checkProductActiveAndVisible(
-                    $product->getIdProduct(),
-                    $product->getIdProductAttribute(),
-                    (int) $this->context->shop->id
-                );
-            });
-
-            $this->cachedFavoriteProducts = $products;
+            $this->cachedFavoriteProducts = $this->getGuestFavoriteProducts();
         }
 
         return $this->cachedFavoriteProducts;
+    }
+
+    /**
+     * @return FavoriteProductDTO[]
+     */
+    private function getCustomerFavoriteProducts(): array
+    {
+        $shopId = (int) $this->context->shop->id;
+
+        $favoriteProducts = $this->favoriteProductsRepository->getFavoriteProductsByCustomer(
+            (int) $this->context->customer->id,
+            $shopId
+        );
+
+        if (empty($favoriteProducts)) {
+            return [];
+        }
+
+        $status = $this->classifyFavorites($favoriteProducts, $shopId);
+
+        $orphaned = [];
+        $visible = [];
+
+        foreach ($favoriteProducts as $favoriteProduct) {
+            $key = $this->getProductKey($favoriteProduct);
+
+            // Product removed from the shop (or deleted straight in the database): purge it.
+            if (!isset($status['existing'][$key])) {
+                $orphaned[] = $favoriteProduct;
+
+                continue;
+            }
+
+            // Existing but disabled/hidden products stay stored yet are not shown or counted.
+            if (isset($status['visible'][$key])) {
+                $visible[] = $favoriteProduct;
+            }
+        }
+
+        if (!empty($orphaned)) {
+            $this->favoriteProductsRepository->removeFavoriteProducts($orphaned);
+            $this->templateCache->clearCartTemplateCache();
+        }
+
+        return array_map(function (FavoriteProduct $favoriteProduct) {
+            return $this->favoriteProductMapper->mapFavoriteProductEntityToFavoriteProductDTO($favoriteProduct);
+        }, $visible);
+    }
+
+    /**
+     * @return FavoriteProductDTO[]
+     */
+    private function getGuestFavoriteProducts(): array
+    {
+        $shopId = (int) $this->context->shop->id;
+
+        $favoriteProducts = $this->favoriteProductsCookieRepository->getFavoriteProducts($shopId);
+
+        if (empty($favoriteProducts)) {
+            return [];
+        }
+
+        $status = $this->classifyFavorites($favoriteProducts, $shopId);
+
+        $existing = [];
+        $visible = [];
+        $hasOrphaned = false;
+
+        foreach ($favoriteProducts as $favoriteProduct) {
+            $key = $this->getProductKey($favoriteProduct);
+
+            // Product removed from the shop: drop it from the favorites cookie.
+            if (!isset($status['existing'][$key])) {
+                $hasOrphaned = true;
+
+                continue;
+            }
+
+            // Disabled/hidden products stay in the cookie (they still exist) but are not shown.
+            $existing[] = $favoriteProduct;
+
+            if (isset($status['visible'][$key])) {
+                $visible[] = $favoriteProduct;
+            }
+        }
+
+        // Only the dedicated favorites cookie is rewritten; cart/checkout cookies are untouched.
+        if ($hasOrphaned) {
+            $this->favoriteProductsCookieRepository->setFavoriteProducts($existing);
+            $this->templateCache->clearCartTemplateCache();
+        }
+
+        return array_values($visible);
+    }
+
+    /**
+     * Classify favorites into existing/visible key maps in a single batched lookup.
+     *
+     * @param array $favoriteProducts objects exposing getIdProduct()/getIdProductAttribute()
+     *
+     * @return array{existing: array<string, true>, visible: array<string, true>}
+     */
+    private function classifyFavorites(array $favoriteProducts, int $shopId): array
+    {
+        $pairs = [];
+
+        foreach ($favoriteProducts as $favoriteProduct) {
+            $pairs[] = [
+                'id_product' => $favoriteProduct->getIdProduct(),
+                'id_product_attribute' => $favoriteProduct->getIdProductAttribute(),
+            ];
+        }
+
+        return $this->productRepository->classifyProducts($pairs, $shopId);
+    }
+
+    /**
+     * @param FavoriteProduct|FavoriteProductDTO $favoriteProduct
+     */
+    private function getProductKey($favoriteProduct): string
+    {
+        return $favoriteProduct->getIdProduct() . '_' . $favoriteProduct->getIdProductAttribute();
     }
 
     public function isFavoriteLimitReached(): bool
@@ -164,11 +267,11 @@ class FavoriteProductService
             if ($orderBy === 'date_add') {
                 if (strtoupper($orderWay) === 'DESC') {
                     usort($products, function ($a, $b) {
-                        return $a['date_add'] < $b['date_add'];
+                        return $b['date_add'] <=> $a['date_add'];
                     });
                 } else {
                     usort($products, function ($a, $b) {
-                        return $a['date_add'] > $b['date_add'];
+                        return $a['date_add'] <=> $b['date_add'];
                     });
                 }
             }

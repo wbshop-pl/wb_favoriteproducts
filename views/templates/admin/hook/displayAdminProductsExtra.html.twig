@@ -1,7 +1,9 @@
 
 {% block content %}
-  {{ form_start(form) }}
-    {{ form_widget(form) }}
-    {{ form_rest(form) }}
-  {{ form_end(form) }}
+  {# Render the stats widget WITHOUT a <form> wrapper. In the PS 8/9 V2 product
+     page this hook is injected inside the main product <form>; a nested <form>
+     (form_start/form_end) is invalid HTML and truncates the product form's POST,
+     causing "product: The CSRF token is invalid." on save. #}
+  {% form_theme form '@Modules/wb_favoriteproducts/views/templates/admin/FormTheme/product_form_theme.html.twig' %}
+  {{ form_widget(form) }}
 {% endblock %}

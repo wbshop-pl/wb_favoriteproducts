@@ -26,7 +26,7 @@ class Wb_favoriteproducts extends Module
         $this->name = 'wb_favoriteproducts';
 
         $this->author = 'WBShop.pl';
-        $this->version = '1.0.1';
+        $this->version = '1.0.3';
         $this->need_instance = 0;
         $this->controllers = ['favorite'];
         $this->bootstrap = true;

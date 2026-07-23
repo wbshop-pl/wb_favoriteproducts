@@ -58,6 +58,10 @@ class ProductFavoriteType extends TranslatorAwareType
             ->setDefaults([
                 'label' => $this->trans('Favorite products stats', 'Modules.Wbfavoriteproducts.Admin'),
                 'form_theme' => '@Modules/wb_favoriteproducts/views/templates/admin/FormTheme/product_form_theme.html.twig',
+                // Display-only stats panel (rendered by the displayAdminProductsExtra
+                // hook). It is never submitted, so it needs no CSRF token — and we
+                // must not emit one inside the product form.
+                'csrf_protection' => false,
             ])
             ->setRequired('product_id')
             ->setAllowedTypes('product_id', 'int')
