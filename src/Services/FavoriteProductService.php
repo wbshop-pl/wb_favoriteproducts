@@ -77,39 +77,28 @@ class FavoriteProductService
             $shopId
         );
 
-        $favoriteProducts = $this->removeOrphanedCustomerFavorites($favoriteProducts, $shopId);
-
-        return array_map(function (FavoriteProduct $favoriteProduct) {
-            return $this->favoriteProductMapper->mapFavoriteProductEntityToFavoriteProductDTO($favoriteProduct);
-        }, $favoriteProducts);
-    }
-
-    /**
-     * Drop favorites whose product was removed from the shop and delete the orphaned rows.
-     *
-     * A product that merely got disabled still exists, so it is kept in the database (the
-     * listing hides it on its own) to avoid destroying the customer's wishlist.
-     *
-     * @param FavoriteProduct[] $favoriteProducts
-     *
-     * @return FavoriteProduct[] favorites still pointing to an existing product
-     */
-    private function removeOrphanedCustomerFavorites(array $favoriteProducts, int $shopId): array
-    {
         if (empty($favoriteProducts)) {
-            return $favoriteProducts;
+            return [];
         }
 
-        $existingKeys = $this->getExistingProductKeys($favoriteProducts, $shopId);
+        $status = $this->classifyFavorites($favoriteProducts, $shopId);
 
-        $kept = [];
         $orphaned = [];
+        $visible = [];
 
         foreach ($favoriteProducts as $favoriteProduct) {
-            if (isset($existingKeys[$this->getProductKey($favoriteProduct)])) {
-                $kept[] = $favoriteProduct;
-            } else {
+            $key = $this->getProductKey($favoriteProduct);
+
+            // Product removed from the shop (or deleted straight in the database): purge it.
+            if (!isset($status['existing'][$key])) {
                 $orphaned[] = $favoriteProduct;
+
+                continue;
+            }
+
+            // Existing but disabled/hidden products stay stored yet are not shown or counted.
+            if (isset($status['visible'][$key])) {
+                $visible[] = $favoriteProduct;
             }
         }
 
@@ -118,7 +107,9 @@ class FavoriteProductService
             $this->templateCache->clearCartTemplateCache();
         }
 
-        return $kept;
+        return array_map(function (FavoriteProduct $favoriteProduct) {
+            return $this->favoriteProductMapper->mapFavoriteProductEntityToFavoriteProductDTO($favoriteProduct);
+        }, $visible);
     }
 
     /**
@@ -134,44 +125,47 @@ class FavoriteProductService
             return [];
         }
 
-        $existingKeys = $this->getExistingProductKeys($favoriteProducts, $shopId);
+        $status = $this->classifyFavorites($favoriteProducts, $shopId);
 
         $existing = [];
+        $visible = [];
         $hasOrphaned = false;
 
         foreach ($favoriteProducts as $favoriteProduct) {
-            if (isset($existingKeys[$this->getProductKey($favoriteProduct)])) {
-                $existing[] = $favoriteProduct;
-            } else {
+            $key = $this->getProductKey($favoriteProduct);
+
+            // Product removed from the shop: drop it from the favorites cookie.
+            if (!isset($status['existing'][$key])) {
                 $hasOrphaned = true;
+
+                continue;
+            }
+
+            // Disabled/hidden products stay in the cookie (they still exist) but are not shown.
+            $existing[] = $favoriteProduct;
+
+            if (isset($status['visible'][$key])) {
+                $visible[] = $favoriteProduct;
             }
         }
 
-        // Persist the cleaned list so products deleted from the shop stop lingering in the cookie.
+        // Only the dedicated favorites cookie is rewritten; cart/checkout cookies are untouched.
         if ($hasOrphaned) {
             $this->favoriteProductsCookieRepository->setFavoriteProducts($existing);
             $this->templateCache->clearCartTemplateCache();
         }
 
-        // Only display products that are currently active and visible; a disabled product
-        // stays in the cookie (it still exists) but is hidden, mirroring the customer listing.
-        return array_values(array_filter($existing, function ($product) use ($shopId) {
-            return $this->productRepository->checkProductActiveAndVisible(
-                $product->getIdProduct(),
-                $product->getIdProductAttribute(),
-                $shopId
-            );
-        }));
+        return array_values($visible);
     }
 
     /**
-     * Build a lookup of "idProduct_idProductAttribute" keys that still exist in the shop.
+     * Classify favorites into existing/visible key maps in a single batched lookup.
      *
      * @param array $favoriteProducts objects exposing getIdProduct()/getIdProductAttribute()
      *
-     * @return array<string, true>
+     * @return array{existing: array<string, true>, visible: array<string, true>}
      */
-    private function getExistingProductKeys(array $favoriteProducts, int $shopId): array
+    private function classifyFavorites(array $favoriteProducts, int $shopId): array
     {
         $pairs = [];
 
@@ -182,13 +176,7 @@ class FavoriteProductService
             ];
         }
 
-        $keys = [];
-
-        foreach ($this->productRepository->filterExistingProducts($pairs, $shopId) as $product) {
-            $keys[$product['id_product'] . '_' . $product['id_product_attribute']] = true;
-        }
-
-        return $keys;
+        return $this->productRepository->classifyProducts($pairs, $shopId);
     }
 
     /**
