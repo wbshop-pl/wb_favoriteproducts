@@ -66,7 +66,7 @@
           {include file='_partials/pagination.tpl' pagination=$listing.pagination}
         {/block}
       {else}
-        <p class="wb-fav-page__empty">
+        <p class="wb-fav-page__empty alert alert-info" role="status">
           {l s='You don\'t have any favorite products yet.' d='Modules.Wbfavoriteproducts.Front'}
         </p>
       {/if}
