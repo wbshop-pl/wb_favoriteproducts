@@ -259,10 +259,7 @@ class FavoriteProductService
             }
 
             $count = count($products);
-
-            if ($count <= ($page - 1) * $limit) {
-                $page = 1 + (int) ($count / $limit);
-            }
+            $page = $this->clampPage($page, $count, $limit);
 
             if ($orderBy === 'date_add') {
                 if (strtoupper($orderWay) === 'DESC') {
@@ -284,6 +281,17 @@ class FavoriteProductService
                 'page' => $page,
             ];
         } else {
+            $count = $this->favoriteProductsRepositoryLegacy->getCountFavoriteProductsForListing(
+                (int) $this->context->customer->id,
+                (int) $this->context->shop->id,
+                $excludeProducts
+            );
+
+            // Clamp before querying so a stale/out-of-range page (e.g. after removing
+            // the last item of the last page) snaps back to a valid page instead of
+            // returning an empty listing while favorites still exist.
+            $page = $this->clampPage($page, $count, $limit);
+
             $favoriteProducts = $this->favoriteProductsRepositoryLegacy->getFavoriteProductsForListing(
                 (int) $this->context->customer->id,
                 (int) $this->context->shop->id,
@@ -294,18 +302,28 @@ class FavoriteProductService
                 $excludeProducts
             );
 
-            $count = $this->favoriteProductsRepositoryLegacy->getCountFavoriteProductsForListing(
-                (int) $this->context->customer->id,
-                (int) $this->context->shop->id,
-                $excludeProducts
-            );
-
             return [
                 'items' => $favoriteProducts,
                 'count' => $count,
                 'page' => $page,
             ];
         }
+    }
+
+    /**
+     * Clamp a requested page number to the valid [1, lastPage] range for the given
+     * total count and page size. An empty list clamps to page 1.
+     */
+    private function clampPage(int $page, int $count, int $limit): int
+    {
+        $limit = $limit > 0 ? $limit : 1;
+        $lastPage = $count > 0 ? (int) ceil($count / $limit) : 1;
+
+        if ($page < 1) {
+            return 1;
+        }
+
+        return $page > $lastPage ? $lastPage : $page;
     }
 
     public function addFavoriteProduct(FavoriteProductDTO $favoriteProduct): void

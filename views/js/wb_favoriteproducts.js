@@ -111,6 +111,35 @@
     });
   }
 
+  // --- Flash messages that survive a full page reload ----------------------
+  // The favorites listing page reloads after add/remove (see toggleFavorite),
+  // so a success message is stashed before the reload and shown afterwards.
+  var FLASH_STORAGE_KEY = 'wbFavoriteFlash';
+
+  function setFlash(messages) {
+    try {
+      window.sessionStorage.setItem(FLASH_STORAGE_KEY, JSON.stringify(messages || []));
+    } catch (e) { /* sessionStorage unavailable — the message is non-critical */ }
+  }
+
+  function flushFlash() {
+    var raw = null;
+    try {
+      raw = window.sessionStorage.getItem(FLASH_STORAGE_KEY);
+      if (raw) {
+        window.sessionStorage.removeItem(FLASH_STORAGE_KEY);
+      }
+    } catch (e) {
+      return;
+    }
+    if (!raw) {
+      return;
+    }
+    try {
+      toast(JSON.parse(raw), 'success');
+    } catch (e) { /* corrupt payload — ignore */ }
+  }
+
   // --- HTML swap helpers ---------------------------------------------------
   function firstElement(html) {
     var tmp = document.createElement('div');
@@ -156,8 +185,8 @@
 
     request(url, { id_product: ids.idProduct, id_product_attribute: ids.idProductAttribute })
       .then(function (data) {
-        toast(data.messages, data.success ? 'success' : 'error');
         if (!data.success) {
+          toast(data.messages, 'error');
           return;
         }
         if (isAdded) {
@@ -169,10 +198,19 @@
         }
         updateTopContent(data.topContent);
 
-        if (window.isFavoriteProductsListingPage
-            && window.prestashop && typeof window.prestashop.emit === 'function') {
-          window.prestashop.emit('updateFacets', window.location.href);
+        // The dedicated favorites listing page renders the module's own template,
+        // which is not compatible with the theme's faceted-search AJAX re-render
+        // (mismatched containers left a phantom empty alert, "0 of 0" pagination
+        // and out-of-sync buttons). Reload so the list, counter, pagination and
+        // empty state always match a normal page load; the message is carried
+        // across the reload via sessionStorage.
+        if (window.isFavoriteProductsListingPage) {
+          setFlash(data.messages);
+          window.location.reload();
+          return;
         }
+
+        toast(data.messages, 'success');
       })
       .catch(function () { toast(['Something went wrong'], 'error'); });
   }
@@ -188,6 +226,7 @@
     });
 
     refreshButtons();
+    flushFlash();
 
     if (window.prestashop && typeof window.prestashop.on === 'function') {
       window.prestashop.on('updatedProduct', function () { window.setTimeout(refreshButtons, 1); });
